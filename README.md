@@ -190,14 +190,13 @@ const math: LaminaMath = await createMathContext();
 
 ## Building from Source
 
+> You need cmake and emsdk to do this.
+
 ```bash
 # Install dependencies
 yarn install
 
-# Build WASM module
-yarn build:wasm:release
-
-# Build JavaScript/TypeScript
+# Build
 yarn build
 
 # Run tests
