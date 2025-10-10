@@ -190,7 +190,7 @@ const math: LaminaMath = await createMathContext();
 
 ## Building from Source
 
-> You need cmake and emsdk to do this.
+**You need cmake and emsdk to do this.**
 
 ```bash
 # Install dependencies
