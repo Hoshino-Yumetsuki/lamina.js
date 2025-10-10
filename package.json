@@ -1,6 +1,6 @@
 {
   "name": "lamina.js",
-  "version": "1.0.0",
+  "version": "1.1.1-beta.1",
   "description": "WebAssembly bindings for Lamina - A math-oriented programming language with precise calculations",
   "main": "lib/index.cjs",
   "module": "lib/index.mjs",
@@ -18,9 +18,10 @@
     "lib"
   ],
   "scripts": {
-    "build:wasm:release": "emcmake cmake -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build",
+    "build:wasm": "emcmake cmake -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build",
+    "build:js": "rolldown -c rolldown.config.js",
+    "build": "yarn build:wasm && yarn build:js",
     "test": "node examples/test.js",
-    "build": "rolldown -c rolldown.config.js",
     "lint": "biome check && biome lint",
     "lint-fix": "biome format --write && biome lint --write"
   },

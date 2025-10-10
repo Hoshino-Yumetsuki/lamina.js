@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16.3)
-project(lamina_wasm VERSION 1.0.0 LANGUAGES CXX)
+project(lamina_wasm VERSION 1.1.1 LANGUAGES CXX)# lamina version is here
 
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 20)
@@ -9,10 +9,27 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 if(EMSCRIPTEN)
     message(STATUS "Building for WebAssembly with Emscripten")
 
+    # Generate version header automatically
+    configure_file(
+        ${CMAKE_CURRENT_SOURCE_DIR}/Lamina/interpreter/version.hpp.in
+        ${CMAKE_BINARY_DIR}/version.hpp
+        @ONLY
+    )
+
+    # Read help file and parse it to C++ string
+    file(READ ${CMAKE_CURRENT_SOURCE_DIR}/Lamina/interpreter/resources/help.txt HELP_TEXT)
+
+    configure_file(
+        ${CMAKE_CURRENT_SOURCE_DIR}/Lamina/interpreter/help_text.hpp.in
+        ${CMAKE_BINARY_DIR}/help_text.hpp
+        @ONLY
+    )
+
     # Set include directories
     include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/Lamina/interpreter
         ${CMAKE_CURRENT_SOURCE_DIR}/bindings
+        ${CMAKE_BINARY_DIR} # version.hpp and help_text.hpp
     )
 
     # Source files from Lamina interpreter
@@ -40,6 +57,9 @@ if(EMSCRIPTEN)
 
     # Create the WASM module
     add_executable(lamina ${LAMINA_SOURCES} ${WASM_BINDINGS})
+
+    # Add version header
+    target_sources(lamina PRIVATE ${CMAKE_BINARY_DIR}/version.hpp)
 
     # Emscripten link flags
     set(EMSCRIPTEN_LINK_FLAGS
@@ -84,11 +104,12 @@ if(EMSCRIPTEN)
     target_compile_options(lamina PRIVATE
         -Wall
         -Wextra
+        -Wpedantic
         -Wno-unused-parameter
         -Wno-unused-variable
     )
 
-    # Set output directory to lib (same as other build artifacts)
+    # Set output directory to lib
     set_target_properties(lamina PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/lib"
     )
@@ -96,3 +117,18 @@ if(EMSCRIPTEN)
 else()
     message(WARNING "This CMakeLists.txt is designed for Emscripten. Use emcmake cmake to build.")
 endif()
+
+#[[
+  This project is the WebAssembly version of Lamina interpreter.
+
+  Build instructions:
+  - Use Emscripten toolchain to build: emcmake cmake -B build -DCMAKE_BUILD_TYPE=Release
+  - Build the project: cmake --build build
+  - Output will be in lib/ directory
+
+  Features:
+  - Automatically generates version.hpp from version.hpp.in
+  - Includes all standard extensions (math, stdio, random, times, array, string, cas, lstruct)
+  - Exports ES6 module for use in web and Node.js environments
+  - Memory growth enabled for dynamic allocation
+]]
