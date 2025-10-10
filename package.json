@@ -1,0 +1,63 @@
+{
+  "name": "lamina.js",
+  "version": "1.0.0",
+  "description": "WebAssembly bindings for Lamina - A math-oriented programming language with precise calculations",
+  "main": "lib/index.cjs",
+  "module": "lib/index.mjs",
+  "types": "lib/index.d.ts",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "require": "./lib/index.cjs",
+      "import": "./lib/index.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "types",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build:wasm:release": "emcmake cmake -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build",
+    "test": "node examples/test.js",
+    "build": "rolldown -c rolldown.config.js",
+    "lint": "biome check && biome lint",
+    "lint-fix": "biome format --write && biome lint --write"
+  },
+  "keywords": [
+    "lamina",
+    "wasm",
+    "webassembly",
+    "math",
+    "calculator",
+    "rational",
+    "bigint",
+    "symbolic",
+    "exact-math",
+    "numerical-computing"
+  ],
+  "license": "LGPL-2.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Hoshino-Yumetsuki/lamina.js.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Hoshino-Yumetsuki/lamina.js/issues"
+  },
+  "homepage": "https://github.com/Hoshino-Yumetsuki/lamina.js#readme",
+  "devDependencies": {
+    "@types/node": "^24.7.1",
+    "child_process": "^1.0.2",
+    "crypto": "^1.0.1",
+    "fs": "^0.0.1-security",
+    "module": "^1.2.5",
+    "rolldown": "1.0.0-beta.42",
+    "rolldown-plugin-dts": "^0.16.11",
+    "typescript": "^5.9.3"
+  },
+  "packageManager": "yarn@4.9.2"
+}
