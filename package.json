@@ -15,11 +15,7 @@
     "./package.json": "./package.json"
   },
   "files": [
-    "lib",
-    "types",
-    "src",
-    "README.md",
-    "LICENSE"
+    "lib"
   ],
   "scripts": {
     "build:wasm:release": "emcmake cmake -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build",
