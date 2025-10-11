@@ -4,22 +4,27 @@
  * Provides a more intuitive and elegant way to use Lamina in Node.js
  */
 
-import { LaminaInterpreter } from './interpreter'
+import { LaminaInterpreter, isModuleReady } from './interpreter'
 
 export class LaminaContext {
   protected _interpreter: LaminaInterpreter
-  protected _initialized = false
 
-  protected constructor(interpreter: LaminaInterpreter) {
+  /**
+   * Create a context with an interpreter instance
+   * @param {LaminaInterpreter} interpreter - Initialized interpreter
+   */
+  constructor(interpreter: LaminaInterpreter) {
     this._interpreter = interpreter
   }
 
+  /**
+   * Create and initialize a new context
+   * @returns {Promise<LaminaContext>} Initialized context
+   */
   static async create(): Promise<LaminaContext> {
     const interpreter = new LaminaInterpreter()
     await interpreter._init()
-    const context = new LaminaContext(interpreter)
-    context._initialized = true
-    return context
+    return new LaminaContext(interpreter)
   }
 
   /**
@@ -28,11 +33,6 @@ export class LaminaContext {
    * @returns {string} Result
    */
   calc(expression: string): string {
-    if (!this._initialized) {
-      throw new Error(
-        'Context not initialized. Use LaminaContext.create() instead of new LaminaContext()'
-      )
-    }
     return this._interpreter.eval(expression)
   }
 
@@ -105,15 +105,15 @@ export class LaminaContext {
    */
   destroy(): void {
     this._interpreter.destroy()
-    this._initialized = false
   }
 }
 
 /**
  * Quick calculation wrapper
- * Must be initialized first with lamina.init()
+ * Auto-initializes when module is imported
  */
 let _globalContext: LaminaContext | null = null
+const _isInitializing = false
 
 interface LaminaGlobal {
   init(): Promise<LaminaContext>
@@ -124,13 +124,32 @@ interface LaminaGlobal {
   createContext(): Promise<LaminaContext>
   cleanup(): void
   readonly context: LaminaContext | null
+  readonly isReady: boolean
   tag(strings: TemplateStringsArray, ...values: (number | string)[]): string
+}
+
+function _ensureGlobalContext(): LaminaContext {
+  if (_globalContext) {
+    return _globalContext
+  }
+
+  // Try auto-initialization if WASM is ready
+  if (isModuleReady()) {
+    const interpreter = new LaminaInterpreter()
+    const context = new LaminaContext(interpreter)
+    _globalContext = context
+    return context
+  }
+
+  throw new Error(
+    'Lamina not ready yet. WASM module is still loading. Please call await lamina.init() first or wait a moment.'
+  )
 }
 
 export const lamina: LaminaGlobal = {
   /**
    * Initialize the global Lamina context
-   * Call this once at the start of your program
+   * Optional - will auto-initialize on first use if WASM is ready
    */
   async init(): Promise<LaminaContext> {
     if (_globalContext) {
@@ -141,46 +160,41 @@ export const lamina: LaminaGlobal = {
   },
 
   /**
-   * Quick calculation (requires init() to be called first)
+   * Check if WASM module is ready for synchronous use
+   */
+  get isReady(): boolean {
+    return isModuleReady()
+  },
+
+  /**
+   * Quick calculation (auto-initializes if WASM is ready)
    * @param {string} expression
    * @returns {string} Result
    */
   calc(expression: string): string {
-    if (!_globalContext) {
-      throw new Error('Lamina not initialized. Call await lamina.init() first.')
-    }
-    return _globalContext.calc(expression)
+    return _ensureGlobalContext().calc(expression)
   },
 
   /**
-   * Set a variable (requires init() to be called first)
+   * Set a variable (auto-initializes if WASM is ready)
    */
   set(name: string, value: number | string): LaminaGlobal {
-    if (!_globalContext) {
-      throw new Error('Lamina not initialized. Call await lamina.init() first.')
-    }
-    _globalContext.set(name, value)
+    _ensureGlobalContext().set(name, value)
     return lamina
   },
 
   /**
-   * Get a variable (requires init() to be called first)
+   * Get a variable (auto-initializes if WASM is ready)
    */
   get(name: string): string {
-    if (!_globalContext) {
-      throw new Error('Lamina not initialized. Call await lamina.init() first.')
-    }
-    return _globalContext.get(name)
+    return _ensureGlobalContext().get(name)
   },
 
   /**
-   * Execute code (requires init() to be called first)
+   * Execute code (auto-initializes if WASM is ready)
    */
   exec(code: string): LaminaGlobal {
-    if (!_globalContext) {
-      throw new Error('Lamina not initialized. Call await lamina.init() first.')
-    }
-    _globalContext.exec(code)
+    _ensureGlobalContext().exec(code)
     return lamina
   },
 
@@ -214,17 +228,23 @@ export const lamina: LaminaGlobal = {
    * Usage: lamina.tag`2 + 3` or lamina.tag`sqrt(${x})`
    */
   tag(strings: TemplateStringsArray, ...values: (number | string)[]): string {
-    if (!_globalContext) {
-      throw new Error('Lamina not initialized. Call await lamina.init() first.')
-    }
-
     let expression = strings[0]
     for (let i = 0; i < values.length; i++) {
       expression += values[i] + strings[i + 1]
     }
 
-    return _globalContext.calc(expression)
+    return _ensureGlobalContext().calc(expression)
   }
 }
 
 export default lamina
+
+// Auto-initialize global context when module is imported
+// This runs in the background and doesn't block module loading
+LaminaContext.create()
+  .then((ctx) => {
+    _globalContext = ctx
+  })
+  .catch(() => {
+    // Silently fail, will retry on first use
+  })

@@ -47,6 +47,7 @@
   },
   "homepage": "https://github.com/Hoshino-Yumetsuki/lamina.js#readme",
   "devDependencies": {
+    "@biomejs/biome": "^2.2.5",
     "@types/node": "^24.7.1",
     "child_process": "^1.0.2",
     "crypto": "^1.0.1",

@@ -16,11 +16,7 @@ async function demo() {
   console.log('Simple calculations:')
   console.log('  2 + 3 =', lamina.calc('2 + 3'))
   console.log('  16 / 9 =', lamina.calc('16 / 9'), '(exact rational!)')
-  console.log(
-    '  sqrt(2) * sqrt(2) =',
-    lamina.calc('sqrt(2) * sqrt(2)'),
-    '(no rounding!)'
-  )
+  console.log('  sqrt(16) =', lamina.calc('sqrt(16)'), '(exact!)')
 
   console.log('\nWith variables:')
   lamina.set('x', 10)

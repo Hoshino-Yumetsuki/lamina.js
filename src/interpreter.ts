@@ -18,6 +18,22 @@ interface LaminaWasmModule {
 
 let wasmModule: LaminaWasmModule | null = null
 let modulePromise: Promise<LaminaWasmModule> | null = null
+let isPreloading = false
+
+/**
+ * Start preloading the WASM module in the background
+ * This is called automatically when the module is imported
+ */
+function startPreload(): void {
+  if (isPreloading || wasmModule || modulePromise) {
+    return
+  }
+  isPreloading = true
+  initModule().catch(() => {
+    // Silently fail, will retry on actual use
+    isPreloading = false
+  })
+}
 
 export async function initModule(): Promise<LaminaWasmModule> {
   if (wasmModule) {
@@ -32,9 +48,11 @@ export async function initModule(): Promise<LaminaWasmModule> {
     try {
       const module = (await createLaminaModule()) as LaminaWasmModule
       wasmModule = module
+      isPreloading = false
       return module
     } catch (error) {
       modulePromise = null
+      isPreloading = false
       const message = error instanceof Error ? error.message : String(error)
       throw new Error(`Failed to initialize Lamina WASM module: ${message}`)
     }
@@ -44,11 +62,41 @@ export async function initModule(): Promise<LaminaWasmModule> {
 }
 
 /**
+ * Check if WASM module is ready (synchronously)
+ */
+export function isModuleReady(): boolean {
+  return wasmModule !== null
+}
+
+// Start preloading immediately when this module is imported
+startPreload()
+
+/**
  * LaminaInterpreter wrapper class
  */
 export class LaminaInterpreter {
   private _instance: LaminaWasmInterpreter | null = null
   private _initialized = false
+
+  /**
+   * Auto-initialize on first use if WASM is ready
+   */
+  private _ensureInitialized(): void {
+    if (this._initialized && this._instance) {
+      return
+    }
+
+    // Try auto-initialization if module is already loaded
+    if (wasmModule && !this._initialized) {
+      this._instance = new wasmModule.LaminaInterpreter()
+      this._initialized = true
+      return
+    }
+
+    throw new Error(
+      'LaminaInterpreter not initialized. WASM module is still loading. Please wait a moment or call await lamina.init() first.'
+    )
+  }
 
   async _init(): Promise<void> {
     if (this._initialized) {
@@ -66,10 +114,9 @@ export class LaminaInterpreter {
    * @returns {string} Execution result
    */
   execute(code: string): string {
-    if (!this._initialized || !this._instance) {
-      throw new Error(
-        'LaminaInterpreter not initialized. Call await createInterpreter() or _init() first.'
-      )
+    this._ensureInitialized()
+    if (!this._instance) {
+      throw new Error('Interpreter instance is not available')
     }
     try {
       return this._instance.execute(code)
@@ -85,10 +132,9 @@ export class LaminaInterpreter {
    * @returns {string} The result as a string
    */
   eval(expression: string): string {
-    if (!this._initialized || !this._instance) {
-      throw new Error(
-        'LaminaInterpreter not initialized. Call await createInterpreter() or _init() first.'
-      )
+    this._ensureInitialized()
+    if (!this._instance) {
+      throw new Error('Interpreter instance is not available')
     }
     try {
       return this._instance.eval(expression)
@@ -104,10 +150,9 @@ export class LaminaInterpreter {
    * @param {number} value - Numeric value
    */
   setVariable(name: string, value: number): void {
-    if (!this._initialized || !this._instance) {
-      throw new Error(
-        'LaminaInterpreter not initialized. Call await createInterpreter() or _init() first.'
-      )
+    this._ensureInitialized()
+    if (!this._instance) {
+      throw new Error('Interpreter instance is not available')
     }
     this._instance.setVariable(name, value)
   }
@@ -118,10 +163,9 @@ export class LaminaInterpreter {
    * @param {string} value - String value
    */
   setStringVariable(name: string, value: string): void {
-    if (!this._initialized || !this._instance) {
-      throw new Error(
-        'LaminaInterpreter not initialized. Call await createInterpreter() or _init() first.'
-      )
+    this._ensureInitialized()
+    if (!this._instance) {
+      throw new Error('Interpreter instance is not available')
     }
     this._instance.setStringVariable(name, value)
   }
@@ -132,10 +176,9 @@ export class LaminaInterpreter {
    * @returns {string} Variable value as string
    */
   getVariable(name: string): string {
-    if (!this._initialized || !this._instance) {
-      throw new Error(
-        'LaminaInterpreter not initialized. Call await createInterpreter() or _init() first.'
-      )
+    this._ensureInitialized()
+    if (!this._instance) {
+      throw new Error('Interpreter instance is not available')
     }
     try {
       return this._instance.getVariable(name)
@@ -146,10 +189,9 @@ export class LaminaInterpreter {
   }
 
   reset(): void {
-    if (!this._initialized || !this._instance) {
-      throw new Error(
-        'LaminaInterpreter not initialized. Call await createInterpreter() or _init() first.'
-      )
+    this._ensureInitialized()
+    if (!this._instance) {
+      throw new Error('Interpreter instance is not available')
     }
     this._instance.reset()
   }
@@ -203,4 +245,12 @@ export async function createInterpreter(): Promise<LaminaInterpreter> {
   const interpreter = new LaminaInterpreter()
   await interpreter._init()
   return interpreter
+}
+
+/**
+ * Wait for WASM module to be ready
+ * @returns {Promise<void>}
+ */
+export async function waitForReady(): Promise<void> {
+  await initModule()
 }

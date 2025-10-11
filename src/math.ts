@@ -5,6 +5,7 @@
  */
 
 import { LaminaContext } from './api'
+import { LaminaInterpreter } from './interpreter'
 
 /**
  * Extended Lamina context with built-in function wrappers
@@ -274,8 +275,9 @@ export class LaminaMath extends LaminaContext {
  * @returns {Promise<LaminaMath>}
  */
 export async function createMathContext(): Promise<LaminaMath> {
-  const ctx = (await LaminaMath.create()) as LaminaMath
-  return ctx
+  const interpreter = new LaminaInterpreter()
+  await interpreter._init()
+  return new LaminaMath(interpreter)
 }
 
 export default LaminaMath

@@ -10,13 +10,11 @@ async function elegantExamples() {
   console.log('=== Lamina.js Elegant API Examples ===\n')
 
   // ========================================
+  // Method 1: Global lamina Object
   // ========================================
   console.log('1. Using Global lamina Object:')
 
-  // Initialize once at the start
-  await lamina.init()
-
-  // Now you can do simple calculations like using a calculator
+  // Direct use
   console.log('   2 + 3 =', lamina.calc('2 + 3'))
   console.log('   16 / 9 =', lamina.calc('16 / 9'), '(exact!)')
   console.log('   sqrt(2) * sqrt(2) =', lamina.calc('sqrt(2) * sqrt(2)'))
@@ -144,6 +142,7 @@ async function elegantExamples() {
   console.log('  ✓ Exact arithmetic (no rounding errors)')
   console.log('  ✓ Symbolic math support')
   console.log('  ✓ Multiple isolated contexts')
+  console.log('  ✓ Auto-initializes in the background')
 }
 
 // Run examples

@@ -2,7 +2,7 @@
  * Basic example of using Lamina.js in Node.js
  */
 
-import { LaminaInterpreter, evaluateExpression } from '../dist/index.js'
+import { createInterpreter, evaluateExpression } from '../lib/index.mjs'
 
 async function main() {
   console.log('=== Lamina.js Examples ===\n')
@@ -21,23 +21,23 @@ async function main() {
 
   console.log('\n2. Using Interpreter Instance:')
   try {
-    const lamina = new LaminaInterpreter()
+    const lamina = await createInterpreter()
 
     // Set variables
-    await lamina.setVariable('x', 10)
-    await lamina.setVariable('y', 20)
+    lamina.setVariable('x', 10)
+    lamina.setVariable('y', 20)
 
     // Get variables
-    const x = await lamina.getVariable('x')
-    const y = await lamina.getVariable('y')
+    const x = lamina.getVariable('x')
+    const y = lamina.getVariable('y')
     console.log('   x =', x)
     console.log('   y =', y)
 
     // Execute code
-    const result = await lamina.execute('var sum = x + y;')
+    const result = lamina.execute('var sum = x + y;')
     console.log('   Execution result:', result)
 
-    const sum = await lamina.getVariable('sum')
+    const sum = lamina.getVariable('sum')
     console.log('   sum =', sum)
 
     // Clean up
@@ -56,12 +56,12 @@ async function main() {
 
   console.log('\n4. Vector Operations:')
   try {
-    const lamina = new LaminaInterpreter()
-    await lamina.execute('var v1 = [1, 2, 3];')
-    await lamina.execute('var v2 = [4, 5, 6];')
-    await lamina.execute('var v3 = v1 + v2;')
+    const lamina = await createInterpreter()
+    lamina.execute('var v1 = [1, 2, 3];')
+    lamina.execute('var v2 = [4, 5, 6];')
+    lamina.execute('var v3 = v1 + v2;')
 
-    const v3 = await lamina.getVariable('v3')
+    const v3 = lamina.getVariable('v3')
     console.log('   [1,2,3] + [4,5,6] =', v3)
 
     lamina.destroy()
@@ -71,10 +71,10 @@ async function main() {
 
   console.log('\n5. Functions:')
   try {
-    const lamina = new LaminaInterpreter()
+    const lamina = await createInterpreter()
 
     // Define a function
-    await lamina.execute(`
+    lamina.execute(`
       func fibonacci(n) {
         if (n <= 1) return n;
         return fibonacci(n - 1) + fibonacci(n - 2);
@@ -82,8 +82,8 @@ async function main() {
     `)
 
     // Call the function
-    await lamina.execute('var fib10 = fibonacci(10);')
-    const fib10 = await lamina.getVariable('fib10')
+    lamina.execute('var fib10 = fibonacci(10);')
+    const fib10 = lamina.getVariable('fib10')
     console.log('   fibonacci(10) =', fib10)
 
     lamina.destroy()

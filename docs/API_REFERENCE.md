@@ -2,22 +2,22 @@
 
 ## API Coverage Status
 
- **完整实现** - Lamina.js完全支持Lamina语言的所有功能！
+ **完整实现** - Lamina.js 完全支持 Lamina 语言的所有功能！
 
-## 核心API
+## 核心 API
 
 ### 基本操作
 
 | API | 描述 | 状态 |
 |-----|------|------|
-| `execute(code)` | 执行Lamina代码 |  已实现 |
+| `execute(code)` | 执行 Lamina 代码 |  已实现 |
 | `eval(expression)` | 求值表达式 |  已实现 |
 | `setVariable(name, value)` | 设置数值变量 |  已实现 |
 | `setStringVariable(name, value)` | 设置字符串变量 |  已实现 |
 | `getVariable(name)` | 获取变量 |  已实现 |
 | `reset()` | 重置解释器 |  已实现 |
 
-## Lamina内建函数
+## Lamina 内建函数
 
 ### 数学函数
 
@@ -56,7 +56,7 @@
 
 | 函数 | 描述 | JavaScript API | 状态 |
 |------|------|----------------|------|
-| `rand()` | 随机浮点数(0-1) | `math.rand()` |  可用 |
+| `rand()` | 随机浮点数 (0-1) | `math.rand()` |  可用 |
 | `randint(start, end)` | 随机整数 | `math.randint(start, end)` |  可用 |
 | `randstr(str)` | 随机字符 | `math.randstr(str)` |  可用 |
 
@@ -116,7 +116,7 @@
 |------|------|----------|
 | `if/else` | 条件分支 |  完全支持 |
 | `while` | 循环 |  完全支持 |
-| `for` | for循环 |  完全支持 |
+| `for` | for 循环 |  完全支持 |
 | `func` | 函数定义 |  完全支持 |
 | `return` | 返回语句 |  完全支持 |
 | `break` | 跳出循环 |  完全支持 |
@@ -127,38 +127,44 @@
 | 特性 | 描述 | 支持状态 |
 |------|------|----------|
 | 精确有理数 | 自动分数表示 |  完全支持 |
-| 精确无理数 | √2, π, e等符号表示 |  完全支持 |
+| 精确无理数 | √2, π, e 等符号表示 |  完全支持 |
 | 向量运算 | 向量加减、点积、叉积 |  完全支持 |
 | 矩阵运算 | 矩阵乘法、行列式 |  完全支持 |
 | 递归函数 | 支持递归调用 |  完全支持 |
 | 大整数 | 任意精度整数 |  完全支持 |
 | 结构体 | 类似字典的数据结构 |  完全支持 |
-| 模块系统 | include语句 |  完全支持 |
+| 模块系统 | include 语句 |  完全支持 |
 
 ## 使用方式
 
-### 方式1：直接执行代码
+### 方式 1：全局 lamina 对象（推荐）
 
 ```javascript
-const { lamina } = require('lamina.js/api');
+import { lamina } from 'lamina.js';
 
-await lamina.init();
+// 直接使用
+console.log(lamina.calc('2 + 3')); // "5"
+lamina.set('x', 10);
+console.log(lamina.calc('x * 2')); // "20"
+
 lamina.exec('var x = sqrt(2);');
 console.log(lamina.get('x')); // "√2"
 ```
 
-### 方式2：表达式求值
+### 方式 2：表达式求值
 
 ```javascript
-await lamina.init();
+import { lamina } from 'lamina.js';
+
 console.log(lamina.calc('2 + 3')); // "5"
 console.log(lamina.calc('pi() * 2^2')); // "4π"
+console.log(lamina.calc('16 / 9')); // "16/9" （精确分数）
 ```
 
-### 方式3：使用数学包装器
+### 方式 3：使用数学包装器
 
 ```javascript
-const { createMathContext } = require('lamina.js/math');
+import { createMathContext } from 'lamina.js';
 
 const math = await createMathContext();
 console.log(math.sqrt(2)); // "√2"
@@ -167,14 +173,31 @@ console.log(math.dot('[1,2,3]', '[4,5,6]')); // "32"
 math.destroy();
 ```
 
-### 方式4：模板标签
+### 方式 4：模板标签
 
 ```javascript
-await lamina.init();
+import { lamina } from 'lamina.js';
 
 const x = 5;
 const result = lamina.tag`${x} * 2 + 1`;
 console.log(result); // "11"
+
+// 支持复杂表达式
+const radius = 10;
+const area = lamina.tag`pi() * ${radius}^2`;
+console.log(area); // "100π"
+```
+
+### 方式 5：独立上下文
+
+```javascript
+import { LaminaContext } from 'lamina.js';
+
+// 创建独立的计算环境
+const ctx = await LaminaContext.create();
+ctx.set('a', 10).set('b', 20);
+console.log(ctx.calc('a + b')); // "30"
+ctx.destroy();
 ```
 
 ## 示例
@@ -183,7 +206,7 @@ console.log(result); // "11"
 
 查看这些文件了解更多：
 
-- `examples/elegant.js` - 优雅API示例
+- `examples/elegant.js` - 优雅 API 示例
 - `examples/builtin.js` - 所有内建函数示例
 - `examples/basic.js` - 基础使用示例
 - `examples/demo.js` - 快速演示
@@ -194,7 +217,7 @@ console.log(result); // "11"
 # 快速演示
 node examples/demo.js
 
-# 优雅API
+# 优雅 API
 node examples/elegant.js
 
 # 内建函数

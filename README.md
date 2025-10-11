@@ -18,6 +18,7 @@ Lamina.js brings the power of [Lamina](https://github.com/Lamina-dev/Lamina) - a
 - **Vector & Matrix** - Built-in support for linear algebra
 - **Fast Execution** - Compiled to WebAssembly for near-native performance
 - **Elegant API** - Simple, calculator-like syntax
+- **Synchronous API** - No async/await after initialization
 
 ## Installation
 
@@ -36,10 +37,7 @@ The simplest way to use Lamina.js - like a calculator!
 ```javascript
 import { lamina } from 'lamina.js';
 
-// Initialize once
-await lamina.init();
-
-// Use it like a calculator!
+// Use it directly!
 console.log(lamina.calc('2 + 3'));           // 5
 console.log(lamina.calc('16 / 9'));          // 16/9 (exact!)
 console.log(lamina.calc('sqrt(2) * sqrt(2)')); // 2 (no rounding!)
@@ -65,15 +63,9 @@ lamina
 For more control and isolated contexts:
 
 ```javascript
-import { createInterpreter, LaminaContext } from 'lamina.js';
+import { LaminaContext } from 'lamina.js';
 
-// Create interpreter instance
-const interpreter = await createInterpreter();
-interpreter.setVariable('x', 42);
-console.log(interpreter.getVariable('x')); // 42
-interpreter.destroy();
-
-// Or use isolated context
+// Create and initialize context
 const ctx = await LaminaContext.create();
 ctx.set('radius', 5).exec('var area = pi() * radius^2;');
 console.log(ctx.get('area')); // 25π
@@ -85,7 +77,6 @@ ctx.destroy();
 ### Exact Arithmetic
 
 ```javascript
-// No floating-point errors!
 lamina.calc('1/3 + 1/6');        // 1/2 (exact)
 lamina.calc('0.1 + 0.2');        // 0.3 (exact)
 lamina.calc('sqrt(8)');          // 2√2 (simplified)
@@ -120,12 +111,12 @@ console.log(ctx.call('fibonacci', 10)); // 55
 Global singleton for simple calculations:
 
 ```javascript
-await lamina.init()                    // Initialize (call once)
 lamina.calc(expression)                // Calculate expression
 lamina.set(name, value)                // Set variable (chainable)
 lamina.get(name)                       // Get variable
 lamina.exec(code)                      // Execute code (chainable)
 lamina.tag`expression`                 // Template tag
+await lamina.createContext()           // Create isolated context
 lamina.cleanup()                       // Clean up
 ```
 
@@ -150,6 +141,8 @@ ctx.destroy()                          // Clean up
 Extended math API with all built-in functions:
 
 ```javascript
+import { createMathContext } from 'lamina.js';
+
 const math = await createMathContext()
 math.sqrt(x), math.pi(), math.e()      // Math functions
 math.dot(v1, v2), math.cross(v1, v2)   // Vector operations
@@ -179,13 +172,13 @@ node examples/test.js        # Test suite
 Lamina.js is written in TypeScript and includes full type definitions:
 
 ```typescript
-import { lamina, LaminaContext, LaminaMath } from 'lamina.js';
+import { lamina, LaminaContext, createMathContext } from 'lamina.js';
 
-await lamina.init();
 const result: string = lamina.calc('2 + 3');
 
+// Or create isolated contexts
 const ctx: LaminaContext = await LaminaContext.create();
-const math: LaminaMath = await createMathContext();
+const math = await createMathContext();
 ```
 
 ## Building from Source
