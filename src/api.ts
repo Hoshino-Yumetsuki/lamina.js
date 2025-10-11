@@ -116,16 +116,22 @@ let _globalContext: LaminaContext | null = null
 const _isInitializing = false
 
 interface LaminaGlobal {
+  // Core calculation methods
   init(): Promise<LaminaContext>
   calc(expression: string): string
   set(name: string, value: number | string): LaminaGlobal
   get(name: string): string
   exec(code: string): LaminaGlobal
+  tag(strings: TemplateStringsArray, ...values: (number | string)[]): string
+
+  // Context management
   createContext(): Promise<LaminaContext>
   cleanup(): void
   readonly context: LaminaContext | null
   readonly isReady: boolean
-  tag(strings: TemplateStringsArray, ...values: (number | string)[]): string
+
+  // Type exports
+  Context: typeof LaminaContext
 }
 
 function _ensureGlobalContext(): LaminaContext {
@@ -146,98 +152,102 @@ function _ensureGlobalContext(): LaminaContext {
   )
 }
 
-export const lamina: LaminaGlobal = {
-  /**
-   * Initialize the global Lamina context
-   * Optional - will auto-initialize on first use if WASM is ready
-   */
-  async init(): Promise<LaminaContext> {
-    if (_globalContext) {
+export const lamina: LaminaGlobal = Object.assign(
+  {
+    // Expose Context class
+    Context: LaminaContext
+  } as const,
+  {
+    /**
+     * Initialize the global Lamina context
+     * Optional - will auto-initialize on first use if WASM is ready
+     */
+    async init(): Promise<LaminaContext> {
+      if (_globalContext) {
+        return _globalContext
+      }
+      _globalContext = await LaminaContext.create()
       return _globalContext
+    },
+
+    /**
+     * Check if WASM module is ready for synchronous use
+     */
+    get isReady(): boolean {
+      return isModuleReady()
+    },
+
+    /**
+     * Quick calculation (auto-initializes if WASM is ready)
+     * @param {string} expression
+     * @returns {string} Result
+     */
+    calc(expression: string): string {
+      return _ensureGlobalContext().calc(expression)
+    },
+
+    /**
+     * Set a variable (auto-initializes if WASM is ready)
+     */
+    set(name: string, value: number | string): LaminaGlobal {
+      _ensureGlobalContext().set(name, value)
+      return lamina
+    },
+
+    /**
+     * Get a variable (auto-initializes if WASM is ready)
+     */
+    get(name: string): string {
+      return _ensureGlobalContext().get(name)
+    },
+
+    /**
+     * Execute code (auto-initializes if WASM is ready)
+     */
+    exec(code: string): LaminaGlobal {
+      _ensureGlobalContext().exec(code)
+      return lamina
+    },
+
+    /**
+     * Create a new isolated context
+     * @returns {Promise<LaminaContext>}
+     */
+    createContext(): Promise<LaminaContext> {
+      return LaminaContext.create()
+    },
+
+    /**
+     * Clean up global context
+     */
+    cleanup(): void {
+      if (_globalContext) {
+        _globalContext.destroy()
+        _globalContext = null
+      }
+    },
+
+    /**
+     * Get the global context
+     */
+    get context(): LaminaContext | null {
+      return _globalContext
+    },
+
+    /**
+     * Template tag for Lamina expressions
+     * Usage: lamina.tag`2 + 3` or lamina.tag`sqrt(${x})`
+     */
+    tag(strings: TemplateStringsArray, ...values: (number | string)[]): string {
+      let expression = strings[0]
+      for (let i = 0; i < values.length; i++) {
+        expression += values[i] + strings[i + 1]
+      }
+
+      return _ensureGlobalContext().calc(expression)
     }
-    _globalContext = await LaminaContext.create()
-    return _globalContext
-  },
-
-  /**
-   * Check if WASM module is ready for synchronous use
-   */
-  get isReady(): boolean {
-    return isModuleReady()
-  },
-
-  /**
-   * Quick calculation (auto-initializes if WASM is ready)
-   * @param {string} expression
-   * @returns {string} Result
-   */
-  calc(expression: string): string {
-    return _ensureGlobalContext().calc(expression)
-  },
-
-  /**
-   * Set a variable (auto-initializes if WASM is ready)
-   */
-  set(name: string, value: number | string): LaminaGlobal {
-    _ensureGlobalContext().set(name, value)
-    return lamina
-  },
-
-  /**
-   * Get a variable (auto-initializes if WASM is ready)
-   */
-  get(name: string): string {
-    return _ensureGlobalContext().get(name)
-  },
-
-  /**
-   * Execute code (auto-initializes if WASM is ready)
-   */
-  exec(code: string): LaminaGlobal {
-    _ensureGlobalContext().exec(code)
-    return lamina
-  },
-
-  /**
-   * Create a new isolated context
-   * @returns {Promise<LaminaContext>}
-   */
-  createContext(): Promise<LaminaContext> {
-    return LaminaContext.create()
-  },
-
-  /**
-   * Clean up global context
-   */
-  cleanup(): void {
-    if (_globalContext) {
-      _globalContext.destroy()
-      _globalContext = null
-    }
-  },
-
-  /**
-   * Get the global context
-   */
-  get context(): LaminaContext | null {
-    return _globalContext
-  },
-
-  /**
-   * Template tag for Lamina expressions
-   * Usage: lamina.tag`2 + 3` or lamina.tag`sqrt(${x})`
-   */
-  tag(strings: TemplateStringsArray, ...values: (number | string)[]): string {
-    let expression = strings[0]
-    for (let i = 0; i < values.length; i++) {
-      expression += values[i] + strings[i + 1]
-    }
-
-    return _ensureGlobalContext().calc(expression)
-  }
-}
-
-export default lamina
+  } as LaminaGlobal
+)
 
 // Auto-initialize global context when module is imported
 // This runs in the background and doesn't block module loading
@@ -248,3 +258,6 @@ LaminaContext.create()
   .catch(() => {
     // Silently fail, will retry on first use
   })
+
+// Export types for TypeScript users
+export type { LaminaGlobal }

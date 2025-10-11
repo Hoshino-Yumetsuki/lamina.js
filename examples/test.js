@@ -3,7 +3,7 @@
  * Run with: yarn test
  */
 
-import { lamina, LaminaContext, createInterpreter } from '../lib/index.mjs'
+import { lamina } from '../lib/index.mjs'
 
 let passed = 0
 let failed = 0
@@ -53,7 +53,7 @@ async function runTests() {
 
   // Test 5: Isolated context
   await test('Isolated context', async () => {
-    const ctx = await LaminaContext.create()
+    const ctx = await lamina.Context.create()
     ctx.set('a', 100)
     const result = ctx.calc('a * 2')
     if (!result.includes('200')) throw new Error(`Expected 200, got ${result}`)
@@ -62,18 +62,18 @@ async function runTests() {
 
   // Test 6: Reset functionality
   await test('Reset functionality', async () => {
-    const interpreter = await createInterpreter()
-    interpreter.setVariable('z', 99)
-    interpreter.reset()
+    const ctx = await lamina.Context.create()
+    ctx.set('z', 99)
+    ctx.reset()
     try {
-      interpreter.getVariable('z')
+      ctx.get('z')
       throw new Error('Expected error after reset')
     } catch (e) {
       if (!e.message.includes('not found')) {
         throw e
       }
     }
-    interpreter.destroy()
+    ctx.destroy()
   })
 
   // Test 7: Exact arithmetic

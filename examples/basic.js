@@ -2,7 +2,7 @@
  * Basic example of using Lamina.js in Node.js
  */
 
-import { createInterpreter, evaluateExpression } from '../lib/index.mjs'
+import { lamina } from '../lib/index.mjs'
 
 async function main() {
   console.log('=== Lamina.js Examples ===\n')
@@ -10,45 +10,45 @@ async function main() {
   // Example 1: Quick expression evaluation
   console.log('1. Quick Expression Evaluation:')
   try {
-    const result1 = await evaluateExpression('2 + 3')
+    const result1 = lamina.calc('2 + 3')
     console.log('   2 + 3 =', result1)
 
-    const result2 = await evaluateExpression('16 / 9')
+    const result2 = lamina.calc('16 / 9')
     console.log('   16 / 9 =', result2, '(exact rational)')
   } catch (error) {
     console.error('   Error:', error.message)
   }
 
-  console.log('\n2. Using Interpreter Instance:')
+  console.log('\n2. Using Context Instance:')
   try {
-    const lamina = await createInterpreter()
+    const ctx = await lamina.Context.create()
 
     // Set variables
-    lamina.setVariable('x', 10)
-    lamina.setVariable('y', 20)
+    ctx.set('x', 10)
+    ctx.set('y', 20)
 
     // Get variables
-    const x = lamina.getVariable('x')
-    const y = lamina.getVariable('y')
+    const x = ctx.get('x')
+    const y = ctx.get('y')
     console.log('   x =', x)
     console.log('   y =', y)
 
     // Execute code
-    const result = lamina.execute('var sum = x + y;')
-    console.log('   Execution result:', result)
+    const _result = ctx.exec('var sum = x + y;')
+    console.log('   Execution completed')
 
-    const sum = lamina.getVariable('sum')
+    const sum = ctx.get('sum')
     console.log('   sum =', sum)
 
     // Clean up
-    lamina.destroy()
+    ctx.destroy()
   } catch (error) {
     console.error('   Error:', error.message)
   }
 
   console.log('\n3. Exact Rational Math:')
   try {
-    const result1 = await evaluateExpression('1/3 + 1/6')
+    const result1 = lamina.calc('1/3 + 1/6')
     console.log('   1/3 + 1/6 =', result1, '(should be 1/2)')
   } catch (error) {
     console.error('   Error:', error.message)
@@ -56,25 +56,25 @@ async function main() {
 
   console.log('\n4. Vector Operations:')
   try {
-    const lamina = await createInterpreter()
-    lamina.execute('var v1 = [1, 2, 3];')
-    lamina.execute('var v2 = [4, 5, 6];')
-    lamina.execute('var v3 = v1 + v2;')
+    const ctx = await lamina.Context.create()
+    ctx.exec('var v1 = [1, 2, 3];')
+    ctx.exec('var v2 = [4, 5, 6];')
+    ctx.exec('var v3 = v1 + v2;')
 
-    const v3 = lamina.getVariable('v3')
+    const v3 = ctx.get('v3')
     console.log('   [1,2,3] + [4,5,6] =', v3)
 
-    lamina.destroy()
+    ctx.destroy()
   } catch (error) {
     console.error('   Error:', error.message)
   }
 
   console.log('\n5. Functions:')
   try {
-    const lamina = await createInterpreter()
+    const ctx = await lamina.Context.create()
 
     // Define a function
-    lamina.execute(`
+    ctx.define(`
       func fibonacci(n) {
         if (n <= 1) return n;
         return fibonacci(n - 1) + fibonacci(n - 2);
@@ -82,11 +82,10 @@ async function main() {
     `)
 
     // Call the function
-    lamina.execute('var fib10 = fibonacci(10);')
-    const fib10 = lamina.getVariable('fib10')
+    const fib10 = ctx.call('fibonacci', 10)
     console.log('   fibonacci(10) =', fib10)
 
-    lamina.destroy()
+    ctx.destroy()
   } catch (error) {
     console.error('   Error:', error.message)
   }

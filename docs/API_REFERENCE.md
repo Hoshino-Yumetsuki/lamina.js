@@ -161,16 +161,15 @@ console.log(lamina.calc('pi() * 2^2')); // "4π"
 console.log(lamina.calc('16 / 9')); // "16/9" （精确分数）
 ```
 
-### 方式 3：使用数学包装器
+### 方式 3：使用内建函数
 
 ```javascript
-import { createMathContext } from 'lamina.js';
+import { lamina } from 'lamina.js';
 
-const math = await createMathContext();
-console.log(math.sqrt(2)); // "√2"
-console.log(math.pi()); // "π"
-console.log(math.dot('[1,2,3]', '[4,5,6]')); // "32"
-math.destroy();
+console.log(lamina.calc('sqrt(2)')); // "√2"
+console.log(lamina.calc('pi()')); // "π"
+lamina.exec('var v1 = [1,2,3]; var v2 = [4,5,6];');
+console.log(lamina.calc('dot(v1, v2)')); // "32"
 ```
 
 ### 方式 4：模板标签
@@ -191,10 +190,10 @@ console.log(area); // "100π"
 ### 方式 5：独立上下文
 
 ```javascript
-import { LaminaContext } from 'lamina.js';
+import { lamina } from 'lamina.js';
 
 // 创建独立的计算环境
-const ctx = await LaminaContext.create();
+const ctx = await lamina.Context.create();
 ctx.set('a', 10).set('b', 20);
 console.log(ctx.calc('a + b')); // "30"
 ctx.destroy();
