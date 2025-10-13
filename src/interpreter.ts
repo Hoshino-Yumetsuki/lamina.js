@@ -46,7 +46,15 @@ export async function initModule(): Promise<LaminaWasmModule> {
 
   modulePromise = (async () => {
     try {
-      const module = (await createLaminaModule()) as LaminaWasmModule
+      // Configure stdout/stderr redirection before module initialization
+      const module = (await createLaminaModule({
+        print: (text: string) => {
+          if (text) console.log(text)
+        },
+        printErr: (text: string) => {
+          if (text) console.error(text)
+        }
+      })) as LaminaWasmModule
       wasmModule = module
       isPreloading = false
       return module
@@ -119,9 +127,24 @@ export class LaminaInterpreter {
       throw new Error('Interpreter instance is not available')
     }
     try {
-      return this._instance.execute(code)
+      const result = this._instance.execute(code)
+      // Check if result contains error indicators
+      if (result && (result.includes('Error:') || result.includes('RuntimeError:'))) {
+        throw new Error(result)
+      }
+      return result
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error)
+      // Get more detailed error information
+      let message = 'Unknown error'
+      if (error instanceof Error) {
+        message = error.message
+      } else if (typeof error === 'number') {
+        message = `Native error code: ${error} (This usually means a function is not defined or there's a runtime error)`
+      } else if (typeof error === 'string') {
+        message = error
+      } else {
+        message = String(error)
+      }
       throw new Error(`Lamina execution error: ${message}`)
     }
   }

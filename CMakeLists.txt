@@ -48,6 +48,8 @@ if(EMSCRIPTEN)
         Lamina/extensions/standard/string.cpp
         Lamina/extensions/standard/cas.cpp
         Lamina/extensions/standard/lstruct.cpp
+        Lamina/extensions/standard/range.cpp
+        Lamina/extensions/standard/debugs.cpp
     )
 
     # WASM bindings
@@ -75,6 +77,7 @@ if(EMSCRIPTEN)
         -s ASSERTIONS=1
         -s NO_EXIT_RUNTIME=1
         "-s EXPORTED_FUNCTIONS=['_malloc','_free']"
+        -fwasm-exceptions
     )
 
     # Add optimization flags for release builds
@@ -107,6 +110,7 @@ if(EMSCRIPTEN)
         -Wpedantic
         -Wno-unused-parameter
         -Wno-unused-variable
+        -fwasm-exceptions
     )
 
     # Set output directory to lib

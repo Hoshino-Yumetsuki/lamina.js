@@ -10,6 +10,18 @@
 
 using namespace emscripten;
 
+// Declare the print function from stdio.cpp
+inline Value print_wasm(const std::vector<Value>& args) {
+    for (size_t i = 0; i < args.size(); ++i) {
+        std::cout << args[i].to_string();
+        if (i != args.size() - 1) {
+            std::cout << " ";
+        }
+    }
+    std::cout << std::endl;
+    return Value();
+}
+
 /**
  * LaminaInterpreter wrapper for JavaScript
  * Provides a simple interface to execute Lamina code from JavaScript/Node.js
@@ -22,6 +34,15 @@ public:
     LaminaInterpreter() {
         // Initialize interpreter with default settings
         interpreter = std::make_unique<Interpreter>();
+
+        // Manually register print function for WebAssembly
+        // This bypasses the static initializer issue
+        interpreter->builtin_functions["print"] = [](const std::vector<Value>& args) -> Value {
+            return print_wasm(args);
+        };
+
+        std::cout << "DEBUG: Registered print function. Total functions: "
+                  << interpreter->builtin_functions.size() << std::endl;
     }
 
     /**
@@ -31,23 +52,41 @@ public:
      */
     std::string execute(const std::string& code) {
         try {
+            std::cout << "DEBUG: Starting execute with code: " << code << std::endl;
+
             // Tokenize - static method
             auto tokens = Lexer::tokenize(code);
+            std::cout << "DEBUG: Tokenization completed, tokens: " << tokens.size() << std::endl;
 
             // Parse - static method
             auto ast = Parser::parse(tokens);
+            std::cout << "DEBUG: Parsing completed" << std::endl;
 
             // Cast ASTNode to Statement (Parser::parse returns a BlockStmt which is a Statement)
             auto stmt = std::unique_ptr<Statement>(static_cast<Statement*>(ast.release()));
 
             // Execute
+            std::cout << "DEBUG: About to execute statement" << std::endl;
             interpreter->execute(stmt);
+            std::cout << "DEBUG: Execution completed" << std::endl;
 
             return "Execution completed successfully";
         } catch (const RuntimeError& e) {
-            return std::string("RuntimeError: ") + e.what();
+            std::string error_msg = std::string("RuntimeError: ") + e.what();
+            std::cerr << error_msg << std::endl;
+            return error_msg;
+        } catch (const StdLibException& e) {
+            std::string error_msg = std::string("StdLibException: ") + e.what();
+            std::cerr << error_msg << std::endl;
+            return error_msg;
         } catch (const std::exception& e) {
-            return std::string("Error: ") + e.what();
+            std::string error_msg = std::string("std::exception: ") + e.what();
+            std::cerr << error_msg << std::endl;
+            return error_msg;
+        } catch (...) {
+            std::string error_msg = "Unknown C++ exception occurred during execution";
+            std::cerr << error_msg << std::endl;
+            return error_msg;
         }
     }
 
