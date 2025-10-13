@@ -88,12 +88,21 @@ async function startRepl(): Promise<void> {
   // Initialize context
   await lamina.init()
 
+  // Set stdin encoding to UTF-8 to support special characters
+  if (process.stdin.setEncoding) {
+    process.stdin.setEncoding('utf-8')
+  }
+
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
     prompt: colorize('> ', 'green'),
     historySize: 100,
-    terminal: true
+    terminal: true,
+    // Add escapeCodeTimeout to properly handle special characters
+    escapeCodeTimeout: 500,
+    // Remove duplicate history entries
+    removeHistoryDuplicates: true
   })
 
   // Handle Ctrl+C
