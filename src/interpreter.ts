@@ -129,9 +129,13 @@ export class LaminaInterpreter {
     try {
       const result = this._instance.execute(code)
       // Check if result contains error indicators
-      if (result && (result.includes('Error:') || result.includes('RuntimeError:'))) {
+      if (
+        result &&
+        (result.includes('Error:') || result.includes('RuntimeError:'))
+      ) {
         throw new Error(result)
       }
+      // Return empty string for successful execution
       return result
     } catch (error) {
       // Get more detailed error information

@@ -40,9 +40,6 @@ public:
         interpreter->builtin_functions["print"] = [](const std::vector<Value>& args) -> Value {
             return print_wasm(args);
         };
-
-        std::cout << "DEBUG: Registered print function. Total functions: "
-                  << interpreter->builtin_functions.size() << std::endl;
     }
 
     /**
@@ -52,25 +49,19 @@ public:
      */
     std::string execute(const std::string& code) {
         try {
-            std::cout << "DEBUG: Starting execute with code: " << code << std::endl;
-
             // Tokenize - static method
             auto tokens = Lexer::tokenize(code);
-            std::cout << "DEBUG: Tokenization completed, tokens: " << tokens.size() << std::endl;
 
             // Parse - static method
             auto ast = Parser::parse(tokens);
-            std::cout << "DEBUG: Parsing completed" << std::endl;
 
             // Cast ASTNode to Statement (Parser::parse returns a BlockStmt which is a Statement)
             auto stmt = std::unique_ptr<Statement>(static_cast<Statement*>(ast.release()));
 
             // Execute
-            std::cout << "DEBUG: About to execute statement" << std::endl;
             interpreter->execute(stmt);
-            std::cout << "DEBUG: Execution completed" << std::endl;
 
-            return "Execution completed successfully";
+            return "";
         } catch (const RuntimeError& e) {
             std::string error_msg = std::string("RuntimeError: ") + e.what();
             std::cerr << error_msg << std::endl;

@@ -199,7 +199,7 @@ ${colorize('Lamina REPL Commands:', 'bright')}
       try {
         // Try to evaluate as expression first
         const result = lamina.calc(codeBuffer)
-        if (result?.trim()) {
+        if (result?.trim() && result.trim() !== 'null') {
           console.log(colorize(result, 'cyan'))
         }
       } catch (_evalError) {
