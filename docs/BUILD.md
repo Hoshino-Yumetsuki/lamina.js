@@ -2,6 +2,7 @@
 
 This document provides detailed instructions for building Lamina.js from source.
 
+> If you want to use your custom plugin, you should add your plugin and build Lamina.js from source by yourself.
 ## Prerequisites
 
 ### Required Software
