@@ -10,6 +10,10 @@ const config = {
   input: './src/index.ts'
 }
 
+const cliConfig = {
+  input: './src/cli.ts'
+}
+
 export default defineConfig([
   {
     ...config,
@@ -45,6 +49,17 @@ export default defineConfig([
       }
     ],
     plugins: [dts({ emitDtsOnly: true })],
+    external: external
+  },
+  {
+    ...cliConfig,
+    output: [
+      {
+        file: 'lib/cli.mjs',
+        format: 'esm',
+        minify: true
+      }
+    ],
     external: external
   }
 ])
