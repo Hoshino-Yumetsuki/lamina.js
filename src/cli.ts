@@ -142,7 +142,9 @@ ${colorize('Lamina REPL Commands:', 'bright')}
             // Try to display variables by evaluating a custom expression
             // Since we don't have direct access to variable listing,
             // we'll show a message
-            console.log(colorize('Variable inspection not yet implemented', 'yellow'))
+            console.log(
+              colorize('Variable inspection not yet implemented', 'yellow')
+            )
             rl.prompt()
             return
 
@@ -166,7 +168,7 @@ ${colorize('Lamina REPL Commands:', 'bright')}
         codeBuffer = line
         braceLevel = 0
       } else {
-        codeBuffer += '\n' + line
+        codeBuffer += `\n${line}`
       }
 
       // Count braces
@@ -197,10 +199,10 @@ ${colorize('Lamina REPL Commands:', 'bright')}
       try {
         // Try to evaluate as expression first
         const result = lamina.calc(codeBuffer)
-        if (result && result.trim()) {
+        if (result?.trim()) {
           console.log(colorize(result, 'cyan'))
         }
-      } catch (evalError) {
+      } catch (_evalError) {
         // If evaluation fails, try to execute as statement
         try {
           lamina.exec(codeBuffer)
