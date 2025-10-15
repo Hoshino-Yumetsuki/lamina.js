@@ -1,6 +1,6 @@
 {
   "name": "lamina.js",
-  "version": "1.2.0-beta.4",
+  "version": "1.2.0-beta.5",
   "description": "WebAssembly bindings for Lamina - A math-oriented programming language with precise calculations",
   "main": "lib/index.cjs",
   "module": "lib/index.mjs",
