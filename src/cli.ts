@@ -258,17 +258,17 @@ async function runFile(filePath: string): Promise<void> {
       process.exit(1)
     }
 
-    // Read file
-    const code = fs.readFileSync(resolvedPath, 'utf-8')
+    // Read file as buffer
+    const buffer = fs.readFileSync(resolvedPath)
 
     console.log(colorize(`Executing file: ${filePath}`, 'dim'))
 
     // Initialize context
     await lamina.init()
 
-    // Execute code
+    // Execute code from buffer
     try {
-      lamina.exec(code)
+      lamina.execBuffer(buffer, 'utf-8')
       console.log()
       console.log(colorize('Program execution completed.', 'green'))
     } catch (error) {

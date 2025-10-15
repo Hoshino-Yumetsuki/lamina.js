@@ -239,7 +239,6 @@ export class LaminaInterpreter {
    * @returns {Promise<string>} Version string
    */
   static async getVersion(): Promise<string> {
-    const _module = await initModule()
     return '1.0.0' // Version can be extracted from WASM if available
   }
 }

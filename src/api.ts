@@ -71,6 +71,21 @@ export class LaminaContext {
   }
 
   /**
+   * Execute Lamina code from a buffer
+   * @param {Buffer | Uint8Array} buffer - Buffer containing Lamina code
+   * @param {string} encoding - Text encoding (default: 'utf-8')
+   * @returns {LaminaContext} this for chaining
+   */
+  execBuffer(
+    buffer: Buffer | Uint8Array,
+    encoding: BufferEncoding = 'utf-8'
+  ): this {
+    const code = Buffer.from(buffer).toString(encoding)
+    this._interpreter.execute(code)
+    return this
+  }
+
+  /**
    * Define a function
    * @param {string} code - Function definition
    * @returns {LaminaContext} this for chaining
@@ -113,7 +128,6 @@ export class LaminaContext {
  * Auto-initializes when module is imported
  */
 let _globalContext: LaminaContext | null = null
-const _isInitializing = false
 
 interface LaminaGlobal {
   // Core calculation methods
@@ -122,6 +136,10 @@ interface LaminaGlobal {
   set(name: string, value: number | string): LaminaGlobal
   get(name: string): string
   exec(code: string): LaminaGlobal
+  execBuffer(
+    buffer: Buffer | Uint8Array,
+    encoding?: BufferEncoding
+  ): LaminaGlobal
   tag(strings: TemplateStringsArray, ...values: (number | string)[]): string
 
   // Context management
@@ -206,6 +224,20 @@ export const lamina: LaminaGlobal = Object.assign(
      */
     exec(code: string): LaminaGlobal {
       _ensureGlobalContext().exec(code)
+      return lamina
+    },
+
+    /**
+     * Execute code from a buffer (auto-initializes if WASM is ready)
+     * @param {Buffer | Uint8Array} buffer - Buffer containing Lamina code
+     * @param {string} encoding - Text encoding (default: 'utf-8')
+     * @returns {LaminaGlobal} this for chaining
+     */
+    execBuffer(
+      buffer: Buffer | Uint8Array,
+      encoding: BufferEncoding = 'utf-8'
+    ): LaminaGlobal {
+      _ensureGlobalContext().execBuffer(buffer, encoding)
       return lamina
     },
 

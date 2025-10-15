@@ -16,6 +16,7 @@
 | `setStringVariable(name, value)` | 设置字符串变量 |  已实现 |
 | `getVariable(name)` | 获取变量 |  已实现 |
 | `reset()` | 重置解释器 |  已实现 |
+| `execBuffer(buffer, encoding)` | 从 Buffer 执行代码 |  已实现 |
 
 ## Lamina 内建函数
 
@@ -199,6 +200,41 @@ console.log(ctx.calc('a + b')); // "30"
 ctx.destroy();
 ```
 
+### 方式 6：从 Buffer 执行代码
+
+```javascript
+import { lamina } from 'lamina.js';
+import fs from 'fs';
+
+// 方式 1：使用全局对象
+await lamina.init();
+const buffer = fs.readFileSync('script.lm');
+lamina.execBuffer(buffer);
+
+// 方式 2：使用独立上下文
+const ctx = await lamina.createContext();
+const buffer2 = Buffer.from('var x = 10; var y = 20;', 'utf-8');
+ctx.execBuffer(buffer2, 'utf-8');
+console.log(ctx.get('x')); // "10"
+ctx.destroy();
+
+// 方式 3：支持 Uint8Array
+const uint8Array = new Uint8Array([...]);
+lamina.execBuffer(uint8Array);
+```
+
+#### API 详情
+
+**LaminaContext.execBuffer(buffer, encoding?)**
+- `buffer`: Buffer 或 Uint8Array - 包含 Lamina 代码的缓冲区
+- `encoding`: BufferEncoding - 文本编码（默认：'utf-8'）
+- 返回: `this` - 支持链式调用
+
+**lamina.execBuffer(buffer, encoding?)**
+- 全局对象的快速方法
+- 自动初始化 WASM 模块
+- 参数与 LaminaContext.execBuffer 相同
+
 ## 示例
 
 ### 完整示例代码
@@ -209,6 +245,8 @@ ctx.destroy();
 - `examples/builtin.js` - 所有内建函数示例
 - `examples/basic.js` - 基础使用示例
 - `examples/demo.js` - 快速演示
+- `examples/test-buffer.js` - Buffer 执行示例
+- `examples/test.lm` - Lamina 脚本示例
 
 ### 运行示例
 
@@ -224,4 +262,7 @@ node examples/builtin.js
 
 # 基础示例
 node examples/basic.js
+
+# Buffer 执行测试
+node examples/test-buffer.js
 ```

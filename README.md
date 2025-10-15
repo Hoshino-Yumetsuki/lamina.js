@@ -69,6 +69,27 @@ console.log(ctx.get('area')); // 25π
 ctx.destroy();
 ```
 
+### Execute from Buffer
+
+Execute Lamina code directly from a file buffer:
+
+```javascript
+import { lamina } from 'lamina.js';
+import fs from 'fs';
+
+// Read .lm file as buffer
+const buffer = fs.readFileSync('script.lm');
+
+// Execute from buffer
+await lamina.init();
+lamina.execBuffer(buffer);
+
+// Or use with context
+const ctx = await lamina.createContext();
+ctx.execBuffer(buffer, 'utf-8');
+ctx.destroy();
+```
+
 ## Documentation
 
 - [Complete Usage Guide](./docs/USAGE.md)
@@ -85,6 +106,7 @@ node examples/demo.js        # Quick demo
 node examples/elegant.js     # Full elegant API examples
 node examples/builtin.js     # All built-in functions
 node examples/test.js        # Test suite
+node examples/test-buffer.js # Buffer execution test
 ```
 
 ## TypeScript Support
