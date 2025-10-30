@@ -41,7 +41,7 @@ See the [`examples/`](../examples/) directory for working code examples:
 
 ## API Overview
 
-### Three Ways to Use Lamina.js
+### Two Ways to Use Lamina.js
 
 #### 1. **Global `lamina` Object** (Simplest)
 
@@ -57,14 +57,6 @@ lamina.calc('2 + 3');
 import { LaminaContext } from 'lamina.js';
 const ctx = await LaminaContext.create();
 ctx.calc('2 + 3');
-```
-
-#### 3. **`LaminaMath` Class** (Extended)
-
-```javascript
-import { createMathContext } from 'lamina.js';
-const math = await createMathContext();
-math.sqrt(2);
 ```
 
 ## Features

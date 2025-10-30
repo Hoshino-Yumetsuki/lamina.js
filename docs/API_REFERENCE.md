@@ -24,22 +24,22 @@
 
 | 函数 | 描述 | JavaScript API | 状态 |
 |------|------|----------------|------|
-| `sqrt(x)` | 平方根（精确无理数） | `math.sqrt(x)` |  可用 |
-| `pi()` | 圆周率常数 | `math.pi()` |  可用 |
-| `e()` | 自然常数 | `math.e()` |  可用 |
-| `abs(x)` | 绝对值 | `math.abs(x)` |  可用 |
-| `sin(x)` | 正弦 | `math.sin(x)` |  可用 |
-| `cos(x)` | 余弦 | `math.cos(x)` |  可用 |
-| `log(x)` | 自然对数 | `math.log(x)` |  可用 |
+| `sqrt(x)` | 平方根（精确无理数） | `lamina.calc('sqrt(x)')` |  可用 |
+| `pi()` | 圆周率常数 | `lamina.calc('pi()')` |  可用 |
+| `e()` | 自然常数 | `lamina.calc('e()')` |  可用 |
+| `abs(x)` | 绝对值 | `lamina.calc('abs(x)')` |  可用 |
+| `sin(x)` | 正弦 | `lamina.calc('sin(x)')` |  可用 |
+| `cos(x)` | 余弦 | `lamina.calc('cos(x)')` |  可用 |
+| `log(x)` | 自然对数 | `lamina.calc('log(x)')` |  可用 |
 
 ### 向量/矩阵函数
 
 | 函数 | 描述 | JavaScript API | 状态 |
 |------|------|----------------|------|
-| `dot(v1, v2)` | 向量点积 | `math.dot(v1, v2)` |  可用 |
-| `cross(v1, v2)` | 三维向量叉积 | `math.cross(v1, v2)` |  可用 |
-| `norm(v)` | 向量模长 | `math.norm(v)` |  可用 |
-| `det(m)` | 矩阵行列式 | `math.det(m)` |  可用 |
+| `dot(v1, v2)` | 向量点积 | `lamina.calc('dot(v1, v2)')` |  可用 |
+| `cross(v1, v2)` | 三维向量叉积 | `lamina.calc('cross(v1, v2)')` |  可用 |
+| `norm(v)` | 向量模长 | `lamina.calc('norm(v)')` |  可用 |
+| `det(m)` | 矩阵行列式 | `lamina.calc('det(m)')` |  可用 |
 
 ### 工具函数
 
@@ -47,19 +47,19 @@
 |------|------|----------------|------|
 | `print(...)` | 打印输出 | `lamina.exec('print(...)')` |  可用 |
 | `input(prompt)` | 获取输入 | `lamina.calc('input("prompt")')` |  可用 |
-| `size(x)` | 获取大小 | `math.size(x)` |  可用 |
-| `fraction(x)` | 小数转分数 | `math.fraction(x)` |  可用 |
-| `decimal(x)` | 分数转小数 | `math.decimal(x)` |  可用 |
-| `range(start, end, step)` | 生成数组 | `math.range(start, end, step)` |  可用 |
+| `size(x)` | 获取大小 | `lamina.calc('size(x)')` |  可用 |
+| `fraction(x)` | 小数转分数 | `lamina.calc('fraction(x)')` |  可用 |
+| `decimal(x)` | 分数转小数 | `lamina.calc('decimal(x)')` |  可用 |
+| `range(start, end, step)` | 生成数组 | `lamina.calc('range(start, end, step)')` |  可用 |
 | `assert(cond, msg)` | 断言 | `lamina.exec('assert(...)')` |  可用 |
 
 ### 随机函数
 
 | 函数 | 描述 | JavaScript API | 状态 |
 |------|------|----------------|------|
-| `rand()` | 随机浮点数 (0-1) | `math.rand()` |  可用 |
-| `randint(start, end)` | 随机整数 | `math.randint(start, end)` |  可用 |
-| `randstr(str)` | 随机字符 | `math.randstr(str)` |  可用 |
+| `rand()` | 随机浮点数 (0-1) | `lamina.calc('rand()')` |  可用 |
+| `randint(start, end)` | 随机整数 | `lamina.calc('randint(start, end)')` |  可用 |
+| `randstr(str)` | 随机字符 | `lamina.calc('randstr(str)')` |  可用 |
 
 ### 时间函数
 
@@ -73,12 +73,12 @@
 
 | 函数 | 描述 | JavaScript API | 状态 |
 |------|------|----------------|------|
-| `string_concat(...)` | 拼接字符串 | `math.stringConcat(...)` |  可用 |
-| `string_char_at(str, index)` | 获取字符 | `math.stringCharAt(str, index)` |  可用 |
-| `string_length(str)` | 字符串长度 | `math.stringLength(str)` |  可用 |
-| `string_find(str, start, sub)` | 查找子串 | `math.stringFind(str, start, sub)` |  可用 |
-| `string_sub_string(str, start, len)` | 截取子串 | `math.stringSubString(str, start, len)` |  可用 |
-| `string_replace_by_index(str, start, sub)` | 替换字符串 | `math.stringReplaceByIndex(str, start, sub)` |  可用 |
+| `string_concat(...)` | 拼接字符串 | `lamina.calc('string_concat(...)')` |  可用 |
+| `string_char_at(str, index)` | 获取字符 | `lamina.calc('string_char_at(str, index)')` |  可用 |
+| `string_length(str)` | 字符串长度 | `lamina.calc('string_length(str)')` |  可用 |
+| `string_find(str, start, sub)` | 查找子串 | `lamina.calc('string_find(str, start, sub)')` |  可用 |
+| `string_sub_string(str, start, len)` | 截取子串 | `lamina.calc('string_sub_string(str, start, len)')` |  可用 |
+| `string_replace_by_index(str, start, sub)` | 替换字符串 | `lamina.calc('string_replace_by_index(str, start, sub)')` |  可用 |
 
 ## 语言特性
 
