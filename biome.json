@@ -13,7 +13,8 @@
       "*.lock"
     ],
     "includes": [
-      "**"
+      "**",
+      "!Lamina"
     ]
   },
   "formatter": {
