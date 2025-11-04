@@ -37,24 +37,27 @@ if(EMSCRIPTEN)
         Lamina/interpreter/interpreter.cpp
         Lamina/interpreter/lexer.cpp
         Lamina/interpreter/parser.cpp
+        Lamina/interpreter/parse_expr.cpp
+        Lamina/interpreter/parse_factor.cpp
+        Lamina/interpreter/parse_stmt.cpp
         Lamina/interpreter/eval.cpp
-        Lamina/interpreter/symbolic.cpp
-        Lamina/interpreter/module_loader.cpp
+        Lamina/interpreter/lamina_api/symbolic.cpp
+        Lamina/interpreter/utils/src_manger.cpp
         Lamina/extensions/standard/math.cpp
-        Lamina/extensions/standard/stdio.cpp
+        Lamina/extensions/standard/basic.cpp
+        Lamina/extensions/standard/io.cpp
         Lamina/extensions/standard/random.cpp
         Lamina/extensions/standard/times.cpp
         Lamina/extensions/standard/array.cpp
         Lamina/extensions/standard/string.cpp
         Lamina/extensions/standard/cas.cpp
-        Lamina/extensions/standard/lstruct.cpp
-        Lamina/extensions/standard/range.cpp
-        Lamina/extensions/standard/debugs.cpp
+        Lamina/extensions/standard/lmStruct.cpp
     )
 
     # WASM bindings
     set(WASM_BINDINGS
         bindings/wasm_bindings.cpp
+        bindings/wasm_module_loader.cpp
     )
 
     # Create the WASM module

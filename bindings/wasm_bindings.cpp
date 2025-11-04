@@ -3,7 +3,7 @@
 #include "../Lamina/interpreter/interpreter.hpp"
 #include "../Lamina/interpreter/parser.hpp"
 #include "../Lamina/interpreter/lexer.hpp"
-#include "../Lamina/interpreter/value.hpp"
+#include "../Lamina/interpreter/lamina_api/value.hpp"
 #include <sstream>
 #include <string>
 #include <memory>
@@ -28,18 +28,23 @@ inline Value print_wasm(const std::vector<Value>& args) {
  */
 class LaminaInterpreter {
 private:
-    std::unique_ptr<Interpreter> interpreter;
+    // Interpreter now uses static methods, no instance needed
+    bool initialized;
 
 public:
-    LaminaInterpreter() {
+    LaminaInterpreter() : initialized(false) {
         // Initialize interpreter with default settings
-        interpreter = std::make_unique<Interpreter>();
-
-        // Manually register print function for WebAssembly
-        // This bypasses the static initializer issue
-        interpreter->builtin_functions["print"] = [](const std::vector<Value>& args) -> Value {
-            return print_wasm(args);
-        };
+        // Create a temporary interpreter instance to initialize static members
+        if (!initialized) {
+            Interpreter temp_interp;
+            initialized = true;
+            
+            // Manually register print function for WebAssembly
+            // This bypasses the static initializer issue
+            Interpreter::builtins["print"] = Value(std::make_shared<LmCppFunction>([](const std::vector<Value>& args) -> Value {
+                return print_wasm(args);
+            }));
+        }
     }
 
     /**
@@ -52,14 +57,14 @@ public:
             // Tokenize - static method
             auto tokens = Lexer::tokenize(code);
 
-            // Parse - static method
-            auto ast = Parser::parse(tokens);
+            // Parse - use Parser constructor and parse_program
+            Parser parser(tokens);
+            auto stmts = parser.parse_program();
 
-            // Cast ASTNode to Statement (Parser::parse returns a BlockStmt which is a Statement)
-            auto stmt = std::unique_ptr<Statement>(static_cast<Statement*>(ast.release()));
-
-            // Execute
-            interpreter->execute(stmt);
+            // Execute each statement
+            for (auto& stmt : stmts) {
+                Interpreter::execute(stmt);
+            }
 
             return "";
         } catch (const RuntimeError& e) {
@@ -95,26 +100,22 @@ public:
             // Tokenize - static method
             auto tokens = Lexer::tokenize(code);
 
-            // Parse - static method
-            auto ast = Parser::parse(tokens);
-
-            // Cast ASTNode to Statement
-            auto stmt = std::unique_ptr<Statement>(static_cast<Statement*>(ast.release()));
+            // Parse - use Parser constructor and parse_program
+            Parser parser(tokens);
+            auto stmts = parser.parse_program();
 
             // Execute the wrapped code
-            if (stmt) {
-                interpreter->execute(stmt);
-
-                // Get the result variable
-                try {
-                    Value result = interpreter->get_variable("__lamina_result__");
-                    return result.to_string();
-                } catch (...) {
-                    return "Error: Could not retrieve result";
-                }
+            for (auto& stmt : stmts) {
+                Interpreter::execute(stmt);
             }
 
-            return "null";
+            // Get the result variable
+            try {
+                Value result = Interpreter::get_variable("__lamina_result__");
+                return result.to_string();
+            } catch (...) {
+                return "Error: Could not retrieve result";
+            }
         } catch (const RuntimeError& e) {
             return std::string("RuntimeError: ") + e.what();
         } catch (const std::exception& e) {
@@ -129,7 +130,7 @@ public:
      */
     void setVariable(const std::string& name, double value) {
         try {
-            interpreter->set_variable(name, Value(value));
+            Interpreter::set_variable(name, Value(value));
         } catch (const std::exception& e) {
             // Handle error silently or throw
         }
@@ -142,7 +143,7 @@ public:
      */
     void setStringVariable(const std::string& name, const std::string& value) {
         try {
-            interpreter->set_variable(name, Value(value));
+            Interpreter::set_variable(name, Value(value));
         } catch (const std::exception& e) {
             // Handle error silently or throw
         }
@@ -155,7 +156,7 @@ public:
      */
     std::string getVariable(const std::string& name) {
         try {
-            Value val = interpreter->get_variable(name);
+            Value val = Interpreter::get_variable(name);
             return val.to_string();
         } catch (const std::exception& e) {
             return std::string("Error: ") + e.what();
@@ -166,8 +167,12 @@ public:
      * Reset the interpreter state
      */
     void reset() {
-        // Create a new interpreter instance
-        interpreter = std::make_unique<Interpreter>();
+        // Reset static state by creating and destroying an Interpreter instance
+        Interpreter temp_interp;
+        // Re-register print function
+        Interpreter::builtins["print"] = Value(std::make_shared<LmCppFunction>([](const std::vector<Value>& args) -> Value {
+            return print_wasm(args);
+        }));
     }
 
     /**

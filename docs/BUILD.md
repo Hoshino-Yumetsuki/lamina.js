@@ -1,263 +1,264 @@
-# Building Lamina.js
+# 构建 Lamina.js
 
-This document provides detailed instructions for building Lamina.js from source.
+本文档提供了从源代码构建 Lamina.js 的详细说明。
 
-> If you want to use your custom plugin, you should add your plugin and build Lamina.js from source by yourself.
-## Prerequisites
+> 如果你想使用自定义插件，需要添加插件并自行从源代码构建 Lamina.js。
 
-### Required Software
+## 前置要求
+
+### 必需软件
 
 1. **Node.js** (>= 14.0.0)
-   - Download: https://nodejs.org/
+   - 下载地址：https://nodejs.org/
 
 2. **Emscripten SDK** (>= 3.1.0)
-   - Installation guide: https://emscripten.org/docs/getting_started/downloads.html
-   - Quick install:
+   - 安装指南：https://emscripten.org/docs/getting_started/downloads.html
+   - 快速安装：
      ```bash
-     # Clone Emscripten SDK
+     # 克隆 Emscripten SDK
      git clone https://github.com/emscripten-core/emsdk.git
      cd emsdk
 
-     # Install and activate latest version
+     # 安装并激活最新版本
      ./emsdk install latest
      ./emsdk activate latest
 
-     # Add to PATH (or add to .bashrc/.zshrc)
+     # 添加到 PATH（或添加到 .bashrc/.zshrc）
      source ./emsdk_env.sh
      ```
 
 3. **CMake** (>= 3.16.3)
-   - Download: https://cmake.org/download/
+   - 下载地址：https://cmake.org/download/
 
 4. **Python** (>= 3.6)
-   - Required by Emscripten
-   - Download: https://www.python.org/downloads/
+   - Emscripten 需要
+   - 下载地址：https://www.python.org/downloads/
 
-### Verify Installation
+### 验证安装
 
 ```bash
-# Check Node.js
+# 检查 Node.js
 node --version
 
-# Check Emscripten
+# 检查 Emscripten
 emcc --version
 
-# Check CMake
+# 检查 CMake
 cmake --version
 ```
 
-## Building Steps
+## 构建步骤
 
-### 1. Clone the Repository
+### 1. 克隆仓库
 
 ```bash
 git clone https://github.com/Lamina-dev/Lamina.js.git
 cd lamina.js
 ```
 
-### 2. Initialize Submodules
+### 2. 初始化子模块
 
-Lamina.js uses the Lamina C++ interpreter as a submodule:
+Lamina.js 使用 Lamina C++ 解释器作为子模块：
 
 ```bash
 git submodule update --init --recursive
 ```
 
-### 3. Install Node.js Dependencies
+### 3. 安装 Node.js 依赖
 
 ```bash
 npm install
-# or
+# 或
 yarn install
 ```
 
-### 4. Build WebAssembly Module
+### 4. 构建 WebAssembly 模块
 
-#### Debug Build
+#### Debug 构建
 
-For development with debug symbols and assertions:
+用于开发，包含调试符号和断言：
 
 ```bash
 npm run build:wasm:debug
 ```
 
-This will:
-- Configure CMake with Debug build type
-- Compile with -O0 (no optimization)
-- Enable assertions and safe heap
-- Include debug symbols (-g)
+这将：
+- 使用 Debug 构建类型配置 CMake
+- 使用 -O0 编译（无优化）
+- 启用断言和安全堆
+- 包含调试符号（-g）
 
-#### Release Build
+#### Release 构建
 
-For production with optimizations:
+用于生产环境，包含优化：
 
 ```bash
 npm run build:wasm:release
 ```
 
-This will:
-- Configure CMake with Release build type
-- Compile with -O3 (maximum optimization)
-- Disable assertions
-- Minimize WASM size
+这将：
+- 使用 Release 构建类型配置 CMake
+- 使用 -O3 编译（最大优化）
+- 禁用断言
+- 最小化 WASM 大小
 
-### 5. Prepare Distribution Files
+### 5. 准备分发文件
 
 ```bash
 npm run build:js
 ```
 
-This copies the JavaScript wrapper and WASM files to `dist/`.
+这会将 JavaScript 包装器和 WASM 文件复制到 `dist/` 目录。
 
-### 6. Run Tests
+### 6. 运行测试
 
 ```bash
 npm test
 ```
 
-## Build Output
+## 构建输出
 
-After a successful build, you should have:
+成功构建后，你应该会得到：
 
 ```
 dist/
-├── lamina.wasm      # WebAssembly binary
-├── lamina.js        # Emscripten glue code
-└── index.js         # JavaScript wrapper
+├── lamina.wasm      # WebAssembly 二进制文件
+├── lamina.js        # Emscripten 胶水代码
+└── index.js         # JavaScript 包装器
 ```
 
-## Build Scripts Reference
+## 构建脚本参考
 
-| Script | Description |
+| 脚本 | 描述 |
 |--------|-------------|
-| `npm run build:wasm` | Alias for build:wasm:debug |
-| `npm run build:wasm:debug` | Build WASM in debug mode |
-| `npm run build:wasm:release` | Build WASM in release mode |
-| `npm run build:js` | Copy files to dist/ |
-| `npm run build` | Full build (WASM release + JS) |
-| `npm run clean` | Clean build artifacts |
-| `npm test` | Run tests |
+| `npm run build:wasm` | build:wasm:debug 的别名 |
+| `npm run build:wasm:debug` | 以 debug 模式构建 WASM |
+| `npm run build:wasm:release` | 以 release 模式构建 WASM |
+| `npm run build:js` | 复制文件到 dist/ |
+| `npm run build` | 完整构建（WASM release + JS） |
+| `npm run clean` | 清理构建产物 |
+| `npm test` | 运行测试 |
 
-## Manual Build
+## 手动构建
 
-If you prefer to build manually:
+如果你更喜欢手动构建：
 
 ```bash
-# Configure with Emscripten
+# 使用 Emscripten 配置
 emcmake cmake -B build -DCMAKE_BUILD_TYPE=Release
 
-# Build
+# 构建
 cmake --build build
 
-# Copy output files
+# 复制输出文件
 cp build/lamina.wasm dist/
 cp build/lamina.js dist/
 cp src/index.js dist/
 ```
 
-## Troubleshooting
+## 故障排除
 
-### Issue: emcmake not found
+### 问题：找不到 emcmake
 
-**Solution**: Make sure Emscripten is properly installed and activated:
+**解决方案**：确保 Emscripten 已正确安装并激活：
 
 ```bash
 source /path/to/emsdk/emsdk_env.sh
 ```
 
-Add this to your `.bashrc` or `.zshrc` for permanent activation.
+将此命令添加到你的 `.bashrc` 或 `.zshrc` 以永久激活。
 
-### Issue: CMake version too old
+### 问题：CMake 版本过旧
 
-**Solution**: Update CMake to version 3.16.3 or later:
+**解决方案**：将 CMake 更新到 3.16.3 或更高版本：
 
 ```bash
-# On Ubuntu/Debian
+# Ubuntu/Debian
 sudo apt update
 sudo apt install cmake
 
-# On macOS
+# macOS
 brew install cmake
 
-# Or download from https://cmake.org/download/
+# 或从 https://cmake.org/download/ 下载
 ```
 
-### Issue: Submodule not initialized
+### 问题：子模块未初始化
 
-**Solution**: Initialize the Lamina submodule:
+**解决方案**：初始化 Lamina 子模块：
 
 ```bash
 git submodule update --init --recursive
 ```
 
-### Issue: Build fails with memory errors
+### 问题：构建失败并出现内存错误
 
-**Solution**: Try building with more memory:
+**解决方案**：尝试使用更多内存进行构建：
 
 ```bash
-# Increase Node.js memory limit
+# 增加 Node.js 内存限制
 export NODE_OPTIONS="--max-old-space-size=4096"
 npm run build
 ```
 
-### Issue: WASM file too large
+### 问题：WASM 文件过大
 
-**Solution**: Make sure you're using release build:
+**解决方案**：确保使用 release 构建：
 
 ```bash
 npm run build:wasm:release
 ```
 
-Release builds are significantly smaller due to optimizations.
+由于优化，release 构建会明显更小。
 
-## Development Workflow
+## 开发工作流
 
-### Making Changes to Bindings
+### 修改绑定代码
 
-1. Edit `bindings/wasm_bindings.cpp`
-2. Rebuild WASM: `npm run build:wasm:debug`
-3. Test: `npm test`
+1. 编辑 `bindings/wasm_bindings.cpp`
+2. 重新构建 WASM：`npm run build:wasm:debug`
+3. 测试：`npm test`
 
-### Making Changes to JavaScript Wrapper
+### 修改 JavaScript 包装器
 
-1. Edit `src/index.js`
-2. Copy to dist: `npm run build:js`
-3. Test: `npm test`
+1. 编辑 `src/index.js`
+2. 复制到 dist：`npm run build:js`
+3. 测试：`npm test`
 
-### Making Changes to Lamina Core
+### 修改 Lamina 核心
 
-1. Edit files in `Lamina/` submodule
-2. Rebuild WASM: `npm run build:wasm:debug`
-3. Test: `npm test`
+1. 编辑 `Lamina/` 子模块中的文件
+2. 重新构建 WASM：`npm run build:wasm:debug`
+3. 测试：`npm test`
 
-## Build Optimization
+## 构建优化
 
-### Size Optimization
+### 大小优化
 
-For smaller WASM files, you can modify `CMakeLists.txt`:
+要获得更小的 WASM 文件，可以修改 `CMakeLists.txt`：
 
 ```cmake
-# Add these flags
+# 添加这些标志
 -s ELIMINATE_DUPLICATE_FUNCTIONS=1
 -s AGGRESSIVE_VARIABLE_ELIMINATION=1
 ```
 
-### Performance Optimization
+### 性能优化
 
-For faster execution:
+要获得更快的执行速度：
 
 ```cmake
-# Use
+# 使用
 -O3
--s ALLOW_MEMORY_GROWTH=0  # If memory requirements are known
+-s ALLOW_MEMORY_GROWTH=0  # 如果内存需求已知
 ```
 
-## Cross-Platform Notes
+## 跨平台说明
 
 ### Windows
 
-- Use Git Bash or WSL for bash scripts
-- Or use CMD/PowerShell equivalents:
+- 使用 Git Bash 或 WSL 运行 bash 脚本
+- 或使用 CMD/PowerShell 等效命令：
   ```cmd
   npm run build:wasm:release
   npm run build:js
@@ -265,15 +266,15 @@ For faster execution:
 
 ### Linux/macOS
 
-- Bash scripts should work out of the box
-- Make sure `scripts/build.sh` is executable:
+- Bash 脚本应该可以直接使用
+- 确保 `scripts/build.sh` 可执行：
   ```bash
   chmod +x scripts/build.sh
   ```
 
-## CI/CD Integration
+## CI/CD 集成
 
-Example GitHub Actions workflow:
+GitHub Actions 工作流示例：
 
 ```yaml
 name: Build
@@ -300,8 +301,8 @@ jobs:
     - run: npm test
 ```
 
-## Further Resources
+## 更多资源
 
-- [Emscripten Documentation](https://emscripten.org/docs/)
-- [CMake Documentation](https://cmake.org/documentation/)
-- [Lamina Language Documentation](https://github.com/Lamina-dev/Lamina/wiki)
+- [Emscripten 文档](https://emscripten.org/docs/)
+- [CMake 文档](https://cmake.org/documentation/)
+- [Lamina 语言文档](https://github.com/Lamina-dev/Lamina/wiki)

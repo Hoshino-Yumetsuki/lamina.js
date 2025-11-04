@@ -48,7 +48,7 @@ async function elegantExamples() {
   // ========================================
   console.log('\n3. Using Isolated Context:')
 
-  const ctx = await lamina.Context.create()
+  let ctx = await lamina.Context.create()
 
   // Fluent API with chaining
   const answer = ctx.set('a', 100).set('b', 50).calc('a - b')
@@ -97,8 +97,8 @@ async function elegantExamples() {
   console.log('   Compound Interest (10 years, 5%) =', lamina.get('amount'))
 
   // Quadratic equation
-  ctx2 = await lamina.Context.create()
-  ctx2.define(`
+  ctx = await lamina.Context.create()
+  ctx.define(`
     func quadratic(a, b, c) {
       var discriminant = b^2 - 4*a*c;
       if (discriminant < 0) return null;
@@ -108,9 +108,9 @@ async function elegantExamples() {
   `)
   console.log(
     '   Quadratic root (x²-5x+6=0) =',
-    ctx2.call('quadratic', 1, -5, 6)
+    ctx.call('quadratic', 1, -5, 6)
   )
-  ctx2.destroy()
+  ctx.destroy()
 
   // ========================================
   // Method 6: Working with Exact Values
